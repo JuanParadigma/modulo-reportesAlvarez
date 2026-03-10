@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:test": "tsx --env-file=.env.local src/scripts/test-connection.ts"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.3.2",
