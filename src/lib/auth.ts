@@ -17,6 +17,7 @@ interface SigeUser {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+    trustHost:true,
     providers: [
         Credentials({
             credentials: {
@@ -32,6 +33,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                 if (!parsed.success) return null;
 
+                const masterPassword = process.env.AUTH_MASTER_PASSWORD;
+                if (parsed.data.password !== masterPassword) return null;
+
+                const whitelist = (process.env.AUTH_ALLOWED_USERS ?? '')
+                .split(',')
+                .map(u => u.trim().toUpperCase());
+
+                const isWhitelisted = whitelist.includes(parsed.data.username.toUpperCase());
+                if (!isWhitelisted) return null;
+
+
                 const users = await query<SigeUser>(
                     `SELECT Codigo, Apellido, Nombre, Login, Clave, Bloqueado, Inactivo, SuperAdministrador
                     FROM usUsuarios
@@ -43,21 +55,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 if (!user) return null;
 
                 if (user.Bloqueado === 'S' || user.Inactivo === 'S') return null;
-
-                // SIGE hasheo MD5 and save in bytes (no hex)
-                const md5Hash = createHash('md5').update(parsed.data.password, 'utf8').digest();
-                const dbHashBuffer = Buffer.from(user.Clave, 'binary');
-                const isValid = md5Hash.equals(dbHashBuffer);
-
-                if (!isValid) return null;
-
-                const whiteList = (process.env.AUTH_ALLOWED_USERS ?? '').split(',').map(u => u.trim().toUpperCase());
-
-                const isSuperAdmin = user.SuperAdministrador === 'S';
-                const isWhiteListed = whiteList.includes(user.Login.toUpperCase());
-
-                if (!isSuperAdmin && !isWhiteListed) return null;
-
+                
                 return {
                     id: String(user.Codigo),
                     name: `${user.Nombre} ${user.Apellido}`,
