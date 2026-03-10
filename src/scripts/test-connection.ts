@@ -1,5 +1,4 @@
-import { query } from "../src/lib/db";
-import sql from 'mssql';
+import { query } from "../lib/db";
 
 async function testConnection(){
     console.log('Probando conexión a SQL Server...');
