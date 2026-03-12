@@ -69,26 +69,34 @@ function DifPct({ value }: { value: number }) {
 }
 
 function buildColsComparativa(labelA: string, labelB: string): ColumnDef<VentasComparativa>[] {
+  // Labels cortos para los headers de columna
+  const shortA = labelA.split(' → ')[0]!.substring(0, 7); // "2025-01"
+  const shortB = labelB.split(' → ')[0]!.substring(0, 7); // "2026-01"
+
   return [
     {
       accessorKey: 'Vendedor',
       header: 'Vendedor',
-      cell: i => <span className="font-medium text-slate-100">{i.getValue<string>()}</span>,
+      cell: i => (
+        <span className="font-medium text-slate-100 text-xs">
+          {i.getValue<string>()}
+        </span>
+      ),
     },
     {
       accessorKey: 'cantA',
-      header: `Cant. ${labelA}`,
+      header: `Cant. ${shortA}`,
       cell: i => (
-        <span className="text-blue-300 text-sm">
+        <span className="text-blue-300 text-xs">
           {i.getValue<number>().toLocaleString('es-AR')}
         </span>
       ),
     },
     {
       accessorKey: 'cantB',
-      header: `Cant. ${labelB}`,
+      header: `Cant. ${shortB}`,
       cell: i => (
-        <span className="text-emerald-300 text-sm">
+        <span className="text-emerald-300 text-xs">
           {i.getValue<number>().toLocaleString('es-AR')}
         </span>
       ),
@@ -100,7 +108,7 @@ function buildColsComparativa(labelA: string, labelB: string): ColumnDef<VentasC
         const v = i.getValue<number>();
         const color = v > 0 ? 'text-emerald-400' : v < 0 ? 'text-red-400' : 'text-slate-500';
         return (
-          <span className={`text-sm font-semibold ${color}`}>
+          <span className={`text-xs font-semibold ${color}`}>
             {v > 0 ? '+' : ''}{v.toLocaleString('es-AR')}
           </span>
         );
@@ -108,18 +116,18 @@ function buildColsComparativa(labelA: string, labelB: string): ColumnDef<VentasC
     },
     {
       accessorKey: 'totalA',
-      header: `$ ${labelA}`,
+      header: `$ ${shortA}`,
       cell: i => (
-        <span className="text-blue-300 font-mono text-sm">
+        <span className="text-blue-300 font-mono text-xs">
           $ {fmt(i.getValue<number>())}
         </span>
       ),
     },
     {
       accessorKey: 'totalB',
-      header: `$ ${labelB}`,
+      header: `$ ${shortB}`,
       cell: i => (
-        <span className="text-emerald-300 font-mono text-sm">
+        <span className="text-emerald-300 font-mono text-xs">
           $ {fmt(i.getValue<number>())}
         </span>
       ),
@@ -131,7 +139,7 @@ function buildColsComparativa(labelA: string, labelB: string): ColumnDef<VentasC
         const v = i.getValue<number>();
         const color = v > 0 ? 'text-emerald-400' : v < 0 ? 'text-red-400' : 'text-slate-500';
         return (
-          <span className={`font-mono text-sm font-semibold ${color}`}>
+          <span className={`font-mono text-xs font-semibold ${color}`}>
             {v > 0 ? '+' : ''}$ {fmt(v)}
           </span>
         );
@@ -144,7 +152,7 @@ function buildColsComparativa(labelA: string, labelB: string): ColumnDef<VentasC
     },
     {
       accessorKey: 'cambioRanking',
-      header: 'Ranking',
+      header: 'Rank',
       cell: i => <RankingBadge cambio={i.getValue<number>()} />,
     },
   ];
@@ -167,6 +175,7 @@ function Tabla<T extends object>({
     setSorting([{ id: sortKey, desc: true }]);
   }, [sortKey]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,
@@ -226,8 +235,6 @@ function Tabla<T extends object>({
     </div>
   );
 }
-
-// ─── Export ───────────────────────────────────────────────────────────────────
 
 interface PropsNormal {
   mode: 'normal';

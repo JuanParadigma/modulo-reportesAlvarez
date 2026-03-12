@@ -2,6 +2,9 @@ import { Suspense } from 'react';
 import {
   getVentasPorVendedor,
   getSucursales,
+  getLineas,
+  getGrupos,
+  getRubros,
   mergePeriodos,
 } from '@/lib/queries/ventas';
 import { VentasFiltros } from '@/components/reportes/ventas/VentasFiltros';
@@ -14,6 +17,9 @@ interface SearchParams {
   desde?:    string;
   hasta?:    string;
   sucursal?: string;
+  linea?:    string;
+  grupo?:    string;
+  rubro?:    string;
   desde2?:   string;
   hasta2?:   string;
 }
@@ -46,7 +52,7 @@ const fmt = (n: number) =>
 function Skeleton() {
   return (
     <div className="space-y-4 animate-pulse">
-      <div className="h-20 bg-slate-900 border border-slate-800 rounded-xl" />
+      <div className="h-28 bg-slate-900 border border-slate-800 rounded-xl" />
       <div className="grid grid-cols-3 gap-4">
         {[1, 2, 3].map(i => (
           <div key={i} className="h-24 bg-slate-900 border border-slate-800 rounded-xl" />
@@ -78,16 +84,25 @@ async function VentasContent({ searchParams }: { searchParams: Promise<SearchPar
   const fechaDesde  = params.desde    ?? primerDiaMes();
   const fechaHasta  = params.hasta    ?? hoy();
   const codSucursal = params.sucursal;
+  const codLinea    = params.linea;
+  const codGrupo    = params.grupo;
+  const codRubro    = params.rubro;
   const fechaDesde2 = params.desde2;
   const fechaHasta2 = params.hasta2;
 
   const modoComparacion = !!(fechaDesde2 && fechaHasta2);
 
-  const [sucursales, periodoA, periodoB] = await Promise.all([
+  const filtros = { fechaDesde, fechaHasta, codSucursal, codLinea, codGrupo, codRubro };
+
+  // Todos los fetches en paralelo
+  const [sucursales, lineas, grupos, rubros, periodoA, periodoB] = await Promise.all([
     getSucursales(),
-    getVentasPorVendedor({ fechaDesde, fechaHasta, codSucursal }),
+    getLineas(),
+    getGrupos(),
+    getRubros(),  // todos — el filtrado por grupo se hace en el cliente
+    getVentasPorVendedor(filtros),
     modoComparacion
-      ? getVentasPorVendedor({ fechaDesde: fechaDesde2!, fechaHasta: fechaHasta2!, codSucursal })
+      ? getVentasPorVendedor({ ...filtros, fechaDesde: fechaDesde2!, fechaHasta: fechaHasta2! })
       : Promise.resolve(null),
   ]);
 
@@ -95,11 +110,11 @@ async function VentasContent({ searchParams }: { searchParams: Promise<SearchPar
   const labelB = modoComparacion ? formatLabel(fechaDesde2!, fechaHasta2!) : '';
 
   const totalA        = periodoA.reduce((s, v) => s + v.ImporteTotal, 0);
-  const comprobantesA = periodoA.reduce((s, v) => s + v.CantidadComprobantes, 0);
   const articulosA    = periodoA.reduce((s, v) => s + v.CantidadArticulos, 0);
+  const comprobantesA = periodoA.reduce((s, v) => s + v.CantidadComprobantes, 0);
 
-  const totalB = periodoB ? periodoB.reduce((s, v) => s + v.ImporteTotal, 0) : null;
-  const difPct = totalB !== null && totalA > 0
+  const totalB  = periodoB ? periodoB.reduce((s, v) => s + v.ImporteTotal, 0) : null;
+  const difPct  = totalB !== null && totalA > 0
     ? (((totalB - totalA) / totalA) * 100).toFixed(1)
     : null;
 
@@ -107,17 +122,41 @@ async function VentasContent({ searchParams }: { searchParams: Promise<SearchPar
     ? mergePeriodos(periodoA, periodoB)
     : null;
 
+  // Label del filtro activo para mostrar en títulos
+  const filtroLabel = [
+    codLinea  && lineas.find(l => l.Codigo === codLinea)?.Nombre,
+    codGrupo  && grupos.find(g => g.Codigo === codGrupo)?.Nombre,
+    codRubro  && rubros.find(r => r.Codigo === codRubro)?.Nombre,
+  ].filter(Boolean).join(' › ');
+
   return (
     <div className="space-y-5">
 
       <VentasFiltros
         sucursales={sucursales}
+        lineas={lineas}
+        grupos={grupos}
+        rubros={rubros}
         fechaDesde={fechaDesde}
         fechaHasta={fechaHasta}
         sucursalActual={codSucursal}
+        lineaActual={codLinea}
+        grupoActual={codGrupo}
+        rubroActual={codRubro}
         fechaDesde2={fechaDesde2}
         fechaHasta2={fechaHasta2}
       />
+
+      {/* Badge filtro activo */}
+      {filtroLabel && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-500">Filtrando por:</span>
+          <span className="text-xs font-semibold text-amber-400 bg-amber-500/10
+                           px-2 py-1 rounded">
+            {filtroLabel}
+          </span>
+        </div>
+      )}
 
       {/* KPIs */}
       <div className="grid grid-cols-3 gap-4">
@@ -143,7 +182,7 @@ async function VentasContent({ searchParams }: { searchParams: Promise<SearchPar
         <h2 className="text-sm font-semibold text-slate-300 mb-4">
           {modoComparacion
             ? `Top vendedores — ${labelA} vs ${labelB}`
-            : 'Top vendedores por importe'}
+            : `Top vendedores por importe${filtroLabel ? ` · ${filtroLabel}` : ''}`}
         </h2>
         {comparativa ? (
           <VentasChart mode="comparativa" data={comparativa} labelA={labelA} labelB={labelB} />
@@ -157,7 +196,7 @@ async function VentasContent({ searchParams }: { searchParams: Promise<SearchPar
         <h2 className="text-sm font-semibold text-slate-300 mb-4">
           {modoComparacion
             ? `Comparativa por vendedor — ${labelA} vs ${labelB}`
-            : 'Detalle por vendedor y sucursal'}
+            : `Detalle por vendedor y sucursal${filtroLabel ? ` · ${filtroLabel}` : ''}`}
         </h2>
         {comparativa ? (
           <VentasTable mode="comparativa" data={comparativa} labelA={labelA} labelB={labelB} />

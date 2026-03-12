@@ -32,7 +32,7 @@ export async function getPool(): Promise<sql.ConnectionPool> {
 }
 
 export async function query<T>(sqlQuery: string): Promise<T[]> {
-  const pool = await getPool();
+  const pool   = await getPool();
   const result = await pool.request().query<T>(sqlQuery);
   return result.recordset;
 }
