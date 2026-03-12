@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import type { Sucursal, Linea, Grupo, Rubro } from '@/lib/queries/ventas';
+import type { Sucursal, Linea, Grupo, Rubro } from '@/features/ventas/queries/ventasPorVendedor.query';
 
 interface Props {
   sucursales: Sucursal[];

@@ -7,7 +7,7 @@ import {
   type ColumnDef,
   type SortingState,
 } from '@tanstack/react-table';
-import type { VentasPorVendedor, VentasComparativa } from '@/lib/queries/ventas';
+import type { VentasPorVendedor, VentasComparativa } from '@/features/ventas/queries/ventasPorVendedor.query';
 
 const fmt = (n: number) =>
   n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

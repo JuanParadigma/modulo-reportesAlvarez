@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
-import type { ArticuloVendido } from '@/lib/queries/articulos';
+import type { ArticuloVendido } from '@/features/articulos/queries/articulosMasVendidorPorProveedor.query';
 
 const COLORS = ['#3B82F6','#6366F1','#8B5CF6','#EC4899','#F59E0B',
                 '#10B981','#06B6D4','#F97316','#84CC16','#EF4444'];

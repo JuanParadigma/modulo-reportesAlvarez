@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import type { Proveedor } from '@/lib/queries/articulos';
-import type { Linea, Grupo, Rubro, Sucursal } from '@/lib/queries/ventas';
+import type { Proveedor } from '@/features/articulos/queries/articulosMasVendidorPorProveedor.query';
+import type { Linea, Grupo, Rubro, Sucursal } from '@/features/ventas/queries/ventasPorVendedor.query';
 
 // Períodos rápidos
 const PERIODOS_RAPIDOS = [

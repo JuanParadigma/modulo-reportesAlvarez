@@ -4,7 +4,7 @@ import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, ReferenceLine, Legend, Cell,
 } from 'recharts';
-import type { VentasPorVendedor, VentasComparativa } from '@/lib/queries/ventas';
+import type { VentasPorVendedor, VentasComparativa } from '@/features/ventas/queries/ventasPorVendedor.query';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

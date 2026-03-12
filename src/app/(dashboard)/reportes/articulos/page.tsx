@@ -1,17 +1,10 @@
 import { Suspense } from 'react';
-import {
-  getTopArticulos,
-  getProveedores,
-} from '@/lib/queries/articulos';
-import {
-  getSucursales,
-  getLineas,
-  getGrupos,
-  getRubros,
-} from '@/lib/queries/ventas';
+
 import { ArticulosFiltros } from '@/components/reportes/articulos/ArticulosFiltros';
 import { ArticulosChart }   from '@/components/reportes/articulos/ArticulosChart';
 import { ArticulosTable }   from '@/components/reportes/articulos/ArticulosTable';
+import { articulosService } from '@/features/articulos/articulos.services';
+import { ventasService } from '@/features/ventas/ventas.services';
 
 // ─── SearchParams ─────────────────────────────────────────────────────────────
 
@@ -94,12 +87,12 @@ async function ArticulosContent({ searchParams }: { searchParams: Promise<Search
   };
 
   const [proveedores, sucursales, lineas, grupos, rubros, articulos] = await Promise.all([
-    getProveedores(),
-    getSucursales(),
-    getLineas(),
-    getGrupos(),
-    getRubros(),
-    getTopArticulos(filtros),
+    articulosService.getProveedores(),
+    ventasService.getSucursales(),
+    ventasService.getLineas(),
+    ventasService.getGrupos(),
+    ventasService.getRubros(),
+    articulosService.getTopVendidos(filtros),
   ]);
 
   const totalCantidad = articulos.reduce((s, a) => s + a.Cantidad, 0);

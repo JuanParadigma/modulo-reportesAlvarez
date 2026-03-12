@@ -1,5 +1,3 @@
-// Agregá esto arriba del layout, en un archivo separado
-// src/components/layout/NavItem.tsx
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -38,11 +36,11 @@ export function NavItem({ item }: { item: NavItemType }) {
       <button
         onClick={() => setOpen(v => !v)}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm
-                   transition-colors duration-150
-                   ${isActive
-                     ? 'text-white bg-slate-800'
-                     : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                   }`}
+        transition-colors duration-150
+        ${isActive
+        ? 'text-white bg-slate-800'
+        : 'text-slate-400 hover:text-white hover:bg-slate-800'
+      }`}
       >
         {item.label}
         <svg
@@ -55,18 +53,18 @@ export function NavItem({ item }: { item: NavItemType }) {
 
       {open && (
         <div className="absolute top-full left-0 mt-1 w-52
-                        bg-slate-900 border border-slate-800 rounded-xl
-                        shadow-xl shadow-black/40 overflow-hidden z-50">
+          bg-slate-900 border border-slate-800 rounded-xl
+          shadow-xl shadow-black/40 overflow-hidden z-50">
           {item.children.map(child => (
             <Link
               key={child.href}
               href={child.href}
               onClick={() => setOpen(false)}
               className={`block px-4 py-2.5 text-sm transition-colors
-                         ${pathname.startsWith(child.href)
-                           ? 'text-white bg-slate-800'
-                           : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-                         }`}
+              ${pathname.startsWith(child.href)
+              ? 'text-white bg-slate-800'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+            }`}
             >
               {child.label}
             </Link>

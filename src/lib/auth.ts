@@ -14,7 +14,6 @@ interface SigeUser {
   SuperAdministrador: string;
 }
 
-// Solo letras, números y algunos caracteres comunes en usernames — sin quotes ni chars peligrosos
 const LOGIN_REGEX = /^[a-zA-Z0-9._-]{1,50}$/;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({

@@ -1,27 +1,20 @@
 import { Suspense } from 'react';
-import {
-  getVentasPorVendedor,
-  getSucursales,
-  getLineas,
-  getGrupos,
-  getRubros,
-  mergePeriodos,
-} from '@/lib/queries/ventas';
+import { ventasService } from '@/features/ventas/ventas.services';
 import { VentasFiltros } from '@/components/reportes/ventas/VentasFiltros';
-import { VentasChart }   from '@/components/reportes/ventas/VentasChart';
-import { VentasTable }   from '@/components/reportes/ventas/VentasTable';
+import { VentasChart } from '@/components/reportes/ventas/VentasChart';
+import { VentasTable } from '@/components/reportes/ventas/VentasTable';
 
 // ─── SearchParams ─────────────────────────────────────────────────────────────
 
 interface SearchParams {
-  desde?:    string;
-  hasta?:    string;
+  desde?: string;
+  hasta?: string;
   sucursal?: string;
-  linea?:    string;
-  grupo?:    string;
-  rubro?:    string;
-  desde2?:   string;
-  hasta2?:   string;
+  linea?: string;
+  grupo?: string;
+  rubro?: string;
+  desde2?: string;
+  hasta2?: string;
 }
 
 interface PageProps {
@@ -81,12 +74,12 @@ function KpiCard({ label, value, sub }: { label: string; value: string; sub?: st
 async function VentasContent({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
 
-  const fechaDesde  = params.desde    ?? primerDiaMes();
-  const fechaHasta  = params.hasta    ?? hoy();
+  const fechaDesde = params.desde ?? primerDiaMes();
+  const fechaHasta = params.hasta ?? hoy();
   const codSucursal = params.sucursal;
-  const codLinea    = params.linea;
-  const codGrupo    = params.grupo;
-  const codRubro    = params.rubro;
+  const codLinea = params.linea;
+  const codGrupo = params.grupo;
+  const codRubro = params.rubro;
   const fechaDesde2 = params.desde2;
   const fechaHasta2 = params.hasta2;
 
@@ -96,37 +89,41 @@ async function VentasContent({ searchParams }: { searchParams: Promise<SearchPar
 
   // Todos los fetches en paralelo
   const [sucursales, lineas, grupos, rubros, periodoA, periodoB] = await Promise.all([
-    getSucursales(),
-    getLineas(),
-    getGrupos(),
-    getRubros(),  // todos — el filtrado por grupo se hace en el cliente
-    getVentasPorVendedor(filtros),
+    ventasService.getSucursales(),
+    ventasService.getLineas(),
+    ventasService.getGrupos(),
+    ventasService.getRubros(),
+    ventasService.getVentasPorVendedor(filtros),
     modoComparacion
-      ? getVentasPorVendedor({ ...filtros, fechaDesde: fechaDesde2!, fechaHasta: fechaHasta2! })
+      ? ventasService.getVentasPorVendedor({
+        ...filtros,
+        fechaDesde: fechaDesde2!,
+        fechaHasta: fechaHasta2!,
+      })
       : Promise.resolve(null),
   ]);
 
   const labelA = formatLabel(fechaDesde, fechaHasta);
   const labelB = modoComparacion ? formatLabel(fechaDesde2!, fechaHasta2!) : '';
 
-  const totalA        = periodoA.reduce((s, v) => s + v.ImporteTotal, 0);
-  const articulosA    = periodoA.reduce((s, v) => s + v.CantidadArticulos, 0);
+  const totalA = periodoA.reduce((s, v) => s + v.ImporteTotal, 0);
+  const articulosA = periodoA.reduce((s, v) => s + v.CantidadArticulos, 0);
   const comprobantesA = periodoA.reduce((s, v) => s + v.CantidadComprobantes, 0);
 
-  const totalB  = periodoB ? periodoB.reduce((s, v) => s + v.ImporteTotal, 0) : null;
-  const difPct  = totalB !== null && totalA > 0
+  const totalB = periodoB ? periodoB.reduce((s, v) => s + v.ImporteTotal, 0) : null;
+  const difPct = totalB !== null && totalA > 0
     ? (((totalB - totalA) / totalA) * 100).toFixed(1)
     : null;
 
   const comparativa = modoComparacion && periodoB
-    ? mergePeriodos(periodoA, periodoB)
+    ? ventasService.mergeComparativa(periodoA, periodoB)
     : null;
 
   // Label del filtro activo para mostrar en títulos
   const filtroLabel = [
-    codLinea  && lineas.find(l => l.Codigo === codLinea)?.Nombre,
-    codGrupo  && grupos.find(g => g.Codigo === codGrupo)?.Nombre,
-    codRubro  && rubros.find(r => r.Codigo === codRubro)?.Nombre,
+    codLinea && lineas.find(l => l.Codigo === codLinea)?.Nombre,
+    codGrupo && grupos.find(g => g.Codigo === codGrupo)?.Nombre,
+    codRubro && rubros.find(r => r.Codigo === codRubro)?.Nombre,
   ].filter(Boolean).join(' › ');
 
   return (
