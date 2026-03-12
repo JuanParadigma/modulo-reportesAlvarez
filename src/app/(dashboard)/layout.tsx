@@ -1,10 +1,16 @@
 import Link from 'next/link';
+import { NavItem } from '@/components/NavItem';
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 const navItems = [
-  { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Ventas', href: '/reportes/ventas' },
+  {
+    label: 'Ventas',
+    children: [
+      { label: 'Ventas x Vendedor', href: '/reportes/ventas' },
+      { label: 'Artículos + Vendidos', href: '/reportes/articulos' },
+    ],
+  },
 ];
 
 export default async function DashboardLayout({
@@ -17,27 +23,19 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-
-      {/* Header */}
       <header className="border-b border-slate-800 bg-slate-900">
-        <div className="max-w-screen-xl mx-auto px-6 h-14 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
 
           {/* Logo + Nav */}
           <div className="flex items-center gap-8">
-            <span className="font-bold text-white text-sm tracking-wide">
-              SIGE Reportes
-            </span>
+            <Link href={'/dashboard'} >
+              <span className="font-bold text-white text-sm tracking-wide">
+                ALVAREZ reportes
+              </span>
+            </Link>
             <nav className="flex items-center gap-1">
               {navItems.map(item => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="px-3 py-1.5 rounded-lg text-sm text-slate-400
-                             hover:text-white hover:bg-slate-800
-                             transition-colors duration-150"
-                >
-                  {item.label}
-                </Link>
+                <NavItem key={item.label} item={item} />
               ))}
             </nav>
           </div>
@@ -60,11 +58,9 @@ export default async function DashboardLayout({
         </div>
       </header>
 
-      {/* Contenido */}
-      <main className="max-w-screen-xl mx-auto px-6 py-6">
+      <main className="max-w-7xl mx-auto px-6 py-6">
         {children}
       </main>
-
     </div>
   );
 }

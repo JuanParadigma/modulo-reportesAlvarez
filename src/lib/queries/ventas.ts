@@ -3,11 +3,10 @@ import { query, getPool } from '@/lib/db';
 // ─── Constantes ──────────────────────────────────────────────────────────────
 
 const TIPOS_VENTA = `'01','03','08','13','24','27'`;
-const TIPOS_NC    = `'04','05','22','25','28'`;
+const TIPOS_NC    = `'04','05','06', '07','25','28', '29'`;
 const TODOS_TIPOS = `${TIPOS_VENTA},${TIPOS_NC}`;
 
 const DATE_REGEX     = /^\d{4}-\d{2}-\d{2}$/;
-const SUCURSAL_REGEX = /^[a-zA-Z0-9]{1,10}$/;
 const COD_REGEX      = /^[a-zA-Z0-9]{1,10}$/;
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
